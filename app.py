@@ -110,22 +110,25 @@ def approve(index):
 # --- Modify Availability Page ---
 @app.route('/availability', methods=['GET', 'POST'])
 def modify_availability():
-    if not session.get('admin'):
-        return redirect(url_for('login'))
-
-    blackout = load_blackout_data()
+    try:
+        with open('blackout.json', 'r') as f:
+            blackout_data = json.load(f)
+    except FileNotFoundError:
+        blackout_data = {"dates": [], "times": []}
 
     if request.method == 'POST':
-        new_date = request.form.get("blackout_date")
-        new_time = request.form.get("blackout_time")
+        date = request.form.get('blackout_date')
+        time = request.form.get('blackout_time')
+        if date and date not in blackout_data["dates"]:
+            blackout_data["dates"].append(date)
+        if time and time not in blackout_data["times"]:
+            blackout_data["times"].append(time)
 
-        if new_date and new_date not in blackout["dates"]:
-            blackout["dates"].append(new_date)
-        if new_time and new_time not in blackout["times"]:
-            blackout["times"].append(new_time)
+        with open('blackout.json', 'w') as f:
+            json.dump(blackout_data, f, indent=4)
 
-        with open("blackout.json", "w") as f:
-            json.dump(blackout, f, indent=4)
+    return render_template('availability.html', blackouts=blackout_data)
+
 
 @app.route('/thank-you')
 def thank_you():
