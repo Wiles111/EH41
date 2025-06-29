@@ -3,115 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <title>Modify Availability</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;600&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #121212;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            padding: 40px;
-        }
-
-        h1 {
-            color: #e91e63;
+            color: pink;
+            font-family: 'Raleway', sans-serif;
+            padding: 20px;
             text-align: center;
         }
-
-        .container {
-            max-width: 600px;
-            margin: auto;
+        form {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 400px;
             background-color: #1e1e1e;
-            padding: 30px;
+            padding: 20px;
             border-radius: 10px;
         }
-
-        label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input, select, button {
-            width: 100%;
+        input, button {
+            margin: 10px 0;
             padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            background-color: #333;
-            color: white;
+            width: 100%;
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
         }
-
-        button {
-            background-color: #e91e63;
+        input[type="submit"], button {
+            background-color: pink;
+            color: black;
+            font-weight: bold;
             cursor: pointer;
         }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
+        h2 {
+            color: hotpink;
         }
-
-        li {
-            background-color: #2a2a2a;
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-        }
-
         .back-link {
-            color: #e91e63;
+            margin-top: 30px;
             display: block;
-            text-align: center;
-            margin-top: 20px;
-            text-decoration: none;
-        }
-
-        .back-link:hover {
+            color: pink;
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>Modify Availability</h1>
-    <div class="container">
-        <form action="/add-blackout" method="post">
-            <label for="date">Add Blackout Date</label>
-            <input type="date" id="date" name="date" required>
+    <h2>Modify Blackout Availability</h2>
 
-            <label for="time">Add Blackout Time</label>
-            <select id="time" name="time">
-                {% for hour in range(8, 23) %}
-                    <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour }}</option>
-                    <option value="{{ "%02d:30" % hour }}">{{ "%02d:30" % hour }}</option>
-                {% endfor %}
-                <option value="23:00">23:00</option>
-                <option value="23:30">23:30</option>
-            </select>
+    <form method="POST" action="{{ url_for('modify_availability') }}">
+        <label for="date">Add Unavailable Date:</label>
+        <input type="date" name="date" id="date">
 
-            <button type="submit">Add to Blackout List</button>
-        </form>
+        <label for="time">Add Unavailable Time:</label>
+        <input type="time" name="time" id="time">
 
-        <h2>Blackout Dates</h2>
-        <ul>
-            {% for date in blackouts.dates %}
-                <li>{{ date }}</li>
-            {% else %}
-                <li>No blackout dates yet.</li>
-            {% endfor %}
-        </ul>
+        <input type="submit" value="Add Blackout">
+    </form>
 
-        <h2>Blackout Times</h2>
-        <ul>
-            {% for time in blackouts.times %}
-                <li>{{ time }}</li>
-            {% else %}
-                <li>No blackout times yet.</li>
-            {% endfor %}
-        </ul>
+    <h3>Current Blackout Dates</h3>
+    <ul>
+        {% for date in blackouts.dates %}
+        <li>{{ date }}</li>
+        {% endfor %}
+    </ul>
 
-        <a class="back-link" href="{{ url_for('admin') }}">← Back to Dashboard</a>
-    </div>
+    <h3>Current Blackout Times</h3>
+    <ul>
+        {% for time in blackouts.times %}
+        <li>{{ time }}</li>
+        {% endfor %}
+    </ul>
+
+    <a class="back-link" href="{{ url_for('admin') }}">← Back to Admin</a>
 </body>
 </html>
+
 
