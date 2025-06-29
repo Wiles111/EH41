@@ -28,7 +28,8 @@ def home():
     with open("visit_counter.json", "w") as f:
         json.dump(counter, f)
 
-    return render_template("home.html", visits=counter["visits"])
+    return render_template("index.html")
+
 
 
 # --- Client Form ---
