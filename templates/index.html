@@ -1,80 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Book Appointment</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #121212;
-            color: #fff;
-        }
-        .btn-pink {
-            background-color: #ff66cc;
-            color: white;
-            border: none;
-        }
-        .btn-pink:hover {
-            background-color: #ff3399;
-        }
-        label {
-            color: #ff66cc;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Appointment</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff69b4;
+      margin-bottom: 30px;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: #1e1e1e;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ff69b4;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      background-color: #2a2a2a;
+      color: #f5f5f5;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #ff69b4;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ff85c1;
+    }
+
+    .error {
+      color: #ff5555;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
 </head>
-<body class="container py-5">
-    <h2 class="text-center mb-4">Book Your Appointment</h2>
-    <form action="/submit" method="post" class="mx-auto" style="max-width: 600px;">
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input name="name" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Phone</label>
-            <input name="phone" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input name="email" type="email" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Service</label>
-            <select name="service" class="form-select" required>
-                <option value="">-- Select a Service --</option>
-                <option>Eyebrow Tattoo</option>
-                <option>Lip Fillers</option>
-                <option>Eyelashes</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Date</label>
-            <input type="date" name="date" id="dateField" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Time</label>
-            <select name="time" class="form-select" required>
-                {% for time_24, time_display in times %}
-                    <option value="{{ time_24 }}">{{ time_display }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <button type="submit" class="btn btn-pink w-100">Submit Request</button>
-    </form>
+<body>
+  <h1>Book an Appointment</h1>
+  <form method="POST" action="/submit">
+    <label for="name">Name:</label>
+    <input type="text" name="name" required>
 
-    <script>
-    const blackoutDates = {{ blackouts | default({"dates": [], "times": []}) | tojson }};
+    <label for="phone">Phone:</label>
+    <input type="text" name="phone" required>
+
+    <label for="email">Email:</label>
+    <input type="email" name="email" required>
+
+    <label for="service">Service:</label>
+    <select name="service" required>
+      <option value="">Select a service</option>
+      <option value="Hair">Hair</option>
+      <option value="Nails">Nails</option>
+      <option value="Makeup">Makeup</option>
+    </select>
+
+    <label for="date" >Date:</label>
+    <input type="date" name="date" id="dateField" required>
+
+    <label for="time">Time:</label>
+    <select name="time" id="timeField" required>
+      {% for time in times %}
+        <option value="{{ time }}">{{ time }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">Submit Request 💖</button>
+  </form>
+
+  <script>
+    // Blackout data from Flask
+    const blackoutDates = {{ blackout_dates | tojson }};
+    const blackoutTimes = {{ blackout_times | tojson }};
+
     const dateField = document.getElementById("dateField");
+    const timeField = document.getElementById("timeField");
 
+    // Disable selecting a blacked-out date
     dateField.addEventListener("input", () => {
-        if (blackoutDates.dates.includes(dateField.value)) {
-            alert("This date is unavailable. Please choose another.");
-            dateField.value = "";
-        }
+      const selectedDate = dateField.value;
+      if (blackoutDates.includes(selectedDate)) {
+        alert("This date is unavailable. Please choose another.");
+        dateField.value = "";
+      }
     });
-</script>
 
+    // Disable blacked-out times on page load
+    function filterTimes() {
+      const selectedDate = dateField.value;
+      const options = timeField.options;
+
+      for (let i = 0; i < options.length; i++) {
+        const time = options[i].value;
+        const isBlackout = blackoutTimes.some(entry => entry.date === selectedDate && entry.time === time);
+        options[i].disabled = isBlackout;
+      }
+    }
+
+    dateField.addEventListener("change", filterTimes);
+  </script>
 </body>
 </html>
+
 
 
 
