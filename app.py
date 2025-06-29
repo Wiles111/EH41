@@ -63,19 +63,16 @@ def thank_you():
 # --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
         password = request.form['password']
         if password == "adminpass":
             session['admin'] = True
             return redirect(url_for('admin'))
         else:
-            return "<h3>Incorrect password</h3>"
-    return '''
-        <form method="post">
-            <input type="password" name="password" placeholder="Enter admin password" required>
-            <input type="submit" value="Login">
-        </form>
-    '''
+            error = "Incorrect password"
+    return render_template('login.html', error=error)
+
 
 # --- Admin Dashboard ---
 @app.route('/admin')
