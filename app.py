@@ -5,29 +5,28 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
 
-
-# --- Helper to load blackout data ---
-def load_blackout_data():
+# --- Utilities ---
+def load_blackouts():
     try:
         with open("blackout.json", "r") as f:
-            data = json.load(f)
-            return data.get("dates", []), data.get("times", [])
+            return json.load(f)
     except FileNotFoundError:
-        return [], []
+        return {"dates": [], "times": []}
 
+def save_blackouts(data):
+    with open("blackout.json", "w") as f:
+        json.dump(data, f, indent=4)
 
 # --- Landing Page ---
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template("home.html")
 
-
-# --- Client Booking Page ---
-@app.route('/book')
-def book():
-    blackout_dates, blackout_times = load_blackout_data()
-    return render_template('index.html', blackouts=blackout_dates, blocked_times=blackout_times)
-
+# --- Client Booking ---
+@app.route('/client')
+def client():
+    blackouts = load_blackouts()
+    return render_template("index.html", blackouts=blackouts)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -60,24 +59,19 @@ def submit():
 
     return redirect(url_for('thank_you'))
 
-
 @app.route('/thank-you')
 def thank_you():
-    return render_template('thank_you.html')
-
+    return render_template("thank_you.html")
 
 # --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        password = request.form['password']
-        if password == "adminpass":
+        if request.form['password'] == "adminpass":
             session['admin'] = True
             return redirect(url_for('admin'))
-        else:
-            return "<h3>Incorrect password</h3>"
-    return render_template('login.html')
-
+        return render_template("login.html", error="Incorrect password")
+    return render_template("login.html")
 
 # --- Admin Dashboard ---
 @app.route('/admin')
@@ -91,87 +85,62 @@ def admin():
     except FileNotFoundError:
         requests = []
 
-    return render_template('admin.html', requests=requests)
+    return render_template("admin.html", requests=requests)
 
+@app.route('/approve/<int:index>')
+def approve(index):
+    try:
+        with open("client_requests.json", "r") as f:
+            data = json.load(f)
 
-# --- Modify Availability Page ---
+        approved = data[index]
+        date, time = approved['datetime'].split()
+        blackouts = load_blackouts()
+        if date not in blackouts['dates']:
+            blackouts['dates'].append(date)
+        if time not in blackouts['times']:
+            blackouts['times'].append(time)
+        save_blackouts(blackouts)
+
+    except Exception as e:
+        print(f"Error approving request: {e}")
+    return redirect(url_for('admin'))
+
+@app.route('/delete/<int:index>')
+def delete(index):
+    try:
+        with open("client_requests.json", "r") as f:
+            data = json.load(f)
+
+        data.pop(index)
+
+        with open("client_requests.json", "w") as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        print(f"Error deleting request: {e}")
+    return redirect(url_for('admin'))
+
+# --- Modify Availability ---
 @app.route('/availability', methods=['GET', 'POST'])
 def modify_availability():
     if not session.get('admin'):
         return redirect(url_for('login'))
 
+    blackouts = load_blackouts()
+
     if request.method == 'POST':
-        new_date = request.form.get('blackout_date')
-        new_time = request.form.get('blackout_time')
+        date = request.form.get('date')
+        time = request.form.get('time')
 
-        try:
-            with open("blackout.json", "r") as f:
-                blackout_data = json.load(f)
-        except FileNotFoundError:
-            blackout_data = {"dates": [], "times": []}
+        if date and date not in blackouts['dates']:
+            blackouts['dates'].append(date)
+        if time and time not in blackouts['times']:
+            blackouts['times'].append(time)
 
-        if new_date and new_date not in blackout_data["dates"]:
-            blackout_data["dates"].append(new_date)
-
-        if new_time and new_time not in blackout_data["times"]:
-            blackout_data["times"].append(new_time)
-
-        with open("blackout.json", "w") as f:
-            json.dump(blackout_data, f, indent=4)
-
+        save_blackouts(blackouts)
         return redirect(url_for('modify_availability'))
 
-    blackout_dates, blackout_times = load_blackout_data()
-    return render_template("availability.html", blackout_dates=blackout_dates, blackout_times=blackout_times)
-
-
-# --- Approve Request (Admin marks a date as unavailable) ---
-@app.route('/approve/<int:request_index>', methods=['POST'])
-def approve(request_index):
-    if not session.get('admin'):
-        return redirect(url_for('login'))
-
-    try:
-        with open("client_requests.json", "r") as f:
-            data = json.load(f)
-        request_item = data[request_index]
-        date_str = request_item["datetime"].split(" ")[0]  # Just the date part
-    except (FileNotFoundError, IndexError, KeyError):
-        return redirect(url_for('admin'))
-
-    try:
-        with open("blackout.json", "r") as f:
-            blackout_data = json.load(f)
-    except FileNotFoundError:
-        blackout_data = {"dates": [], "times": []}
-
-    if date_str not in blackout_data["dates"]:
-        blackout_data["dates"].append(date_str)
-
-    with open("blackout.json", "w") as f:
-        json.dump(blackout_data, f, indent=4)
-
-    return redirect(url_for('admin'))
-
-
-# --- Delete Request ---
-@app.route('/delete/<int:request_index>', methods=['POST'])
-def delete_request(request_index):
-    if not session.get('admin'):
-        return redirect(url_for('login'))
-
-    try:
-        with open("client_requests.json", "r") as f:
-            data = json.load(f)
-        if 0 <= request_index < len(data):
-            del data[request_index]
-        with open("client_requests.json", "w") as f:
-            json.dump(data, f, indent=4)
-    except FileNotFoundError:
-        pass
-
-    return redirect(url_for('admin'))
-
+    return render_template("availability.html", blackouts=blackouts)
 
 if __name__ == '__main__':
     app.run(debug=True)
