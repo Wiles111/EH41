@@ -1,12 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Welcome</title>
+    <meta charset="UTF-8">
+    <title>Glow Beauty Studio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+        }
+        .btn-custom {
+            background-color: #ff66cc;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #ff3385;
+        }
+    </style>
 </head>
 <body>
-    <h2>Welcome to EH41 by Evelyn Hache!</h2>
-    <p>Are you a:</p>
-    <a href="/client"><button>Client</button></a>
-    <a href="/login"><button>Administrator</button></a>
+    <div class="container text-center mt-5">
+        <h1 class="mb-4 fw-bold">💖 Glow Beauty Studio</h1>
+        <p class="lead">Welcome! Please choose an option below:</p>
+        <div class="d-flex justify-content-center gap-4 mt-4">
+            <a href="/client" class="btn btn-custom btn-lg">I'm a Client</a>
+            <a href="/login" class="btn btn-outline-light btn-lg">Administrator</a>
+        </div>
+    </div>
 </body>
 </html>
+
