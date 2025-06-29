@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request an Appointment</title>
+</head>
+<body>
+    <h2>Request an Appointment</h2>
+    <form action="/submit" method="post">
+        <input name="name" placeholder="Name" required><br>
+        <input name="phone" placeholder="Phone" required><br>
+        <input name="email" placeholder="Email"><br>
+        <select name="service">
+            <option value="Eyebrow Tattoo">Eyebrow Tattoo</option>
+            <option value="Lip Filler">Lip Filler</option>
+            <option value="Eyelash Extensions">Eyelash Extensions</option>
+        </select><br>
+        <input name="date" type="date" required><br>
+        <input name="time" type="time" required><br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
