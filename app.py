@@ -6,14 +6,12 @@ app = Flask(__name__)
 app.secret_key = "your-secret-key"
 
 # Jinja filter to format hours into AM/PM
-@app.template_filter('format_ampm')
-def format_ampm(hour):
-    h = int(hour)
-    suffix = "AM" if h < 12 else "PM"
-    display_hour = h if 1 <= h <= 12 else h - 12
-    if display_hour == 0:
-        display_hour = 12
-    return f"{display_hour} {suffix}"
+@app.template_filter('ampm')
+def ampm(time_str):
+    from datetime import datetime
+    dt = datetime.strptime(time_str, "%H:%M")
+    return dt.strftime("%-I:%M %p")  # Use %#I for Windows if %-I doesn't work
+
 
 
 # --- Landing Page ---
