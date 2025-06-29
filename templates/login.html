@@ -28,11 +28,16 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center fw-bold mb-4">🔒 Admin Access</h2>
+        <h2 class="text-center fw-bold mb-4">🔒 Admin Login</h2>
         <div class="login-box">
+            {% if error %}
+                <div class="alert alert-danger text-center" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
             <form method="post" action="/login">
                 <div class="mb-3">
-                    <label for="password" class="form-label">Enter Admin Password</label>
+                    <label for="password" class="form-label">Admin Password</label>
                     <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn btn-pink w-100">Login</button>
@@ -41,3 +46,4 @@
     </div>
 </body>
 </html>
+
