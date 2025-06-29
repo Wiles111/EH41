@@ -1,138 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book Appointment</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: #f5f5f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #ff69b4;
-      margin-bottom: 30px;
-    }
-
-    form {
-      max-width: 500px;
-      margin: 0 auto;
-      background-color: #1e1e1e;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #ff69b4;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-      background-color: #2a2a2a;
-      color: #f5f5f5;
-    }
-
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background-color: #ff69b4;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #ff85c1;
-    }
-
-    .error {
-      color: #ff5555;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Book Appointment 💋</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #f8f8f8;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        .container {
+            background-color: #1c1c1c;
+            padding: 30px 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+        }
+        h1 {
+            text-align: center;
+            color: hotpink;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin: 15px 0 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background-color: #333;
+            color: #fff;
+        }
+        input[type="submit"] {
+            background-color: hotpink;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: deeppink;
+        }
+        .note {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #bbb;
+        }
+    </style>
 </head>
 <body>
-  <h1>Book an Appointment</h1>
-  <form method="POST" action="/submit">
-    <label for="name">Name:</label>
-    <input type="text" name="name" required>
+    <div class="container">
+        <h1>Book an Appointment 💋</h1>
+        <form method="post" action="/submit">
+            <label for="name">Name:</label>
+            <input type="text" name="name" required>
 
-    <label for="phone">Phone:</label>
-    <input type="text" name="phone" required>
+            <label for="phone">Phone:</label>
+            <input type="text" name="phone" required>
 
-    <label for="email">Email:</label>
-    <input type="email" name="email" required>
+            <label for="email">Email:</label>
+            <input type="email" name="email" required>
 
-    <label for="service">Service:</label>
-    <select name="service" required>
-      <option value="">Select a service</option>
-      <option value="Hair">Hair</option>
-      <option value="Nails">Nails</option>
-      <option value="Makeup">Makeup</option>
-    </select>
+            <label for="service">Service:</label>
+            <select name="service" required>
+                <option value="">-- Select --</option>
+                <option>Makeup</option>
+                <option>Lashes</option>
+                <option>Brows</option>
+                <option>Consultation</option>
+            </select>
 
-    <label for="date" >Date:</label>
-    <input type="date" name="date" id="dateField" required>
+            <label for="date">Date:</label>
+            <input type="date" name="date" id="dateField" required>
 
-    <label for="time">Time:</label>
-    <select name="time" id="timeField" required>
-      {% for time in times %}
-        <option value="{{ time }}">{{ time }}</option>
-      {% endfor %}
-    </select>
+            <label for="time">Time:</label>
+            <select name="time" id="timeField" required>
+                <option value="">-- Select --</option>
+                {% for t in times %}
+                    {% if t not in blackout_times %}
+                        <option value="{{ t }}">{{ t }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
 
-    <button type="submit">Submit Request 💖</button>
-  </form>
+            <input type="submit" value="Submit Request 💌">
+        </form>
 
-  <script>
-    // Blackout data from Flask
-    const blackoutDates = {{ blackout_dates | tojson }};
-    const blackoutTimes = {{ blackout_times | tojson }};
+        <div class="note">
+            Unavailable dates and times are disabled automatically.
+        </div>
+    </div>
 
-    const dateField = document.getElementById("dateField");
-    const timeField = document.getElementById("timeField");
+    <script>
+        const blackoutDates = {{ blackout_dates | tojson }};
+        const dateField = document.getElementById("dateField");
 
-    // Disable selecting a blacked-out date
-    dateField.addEventListener("input", () => {
-      const selectedDate = dateField.value;
-      if (blackoutDates.includes(selectedDate)) {
-        alert("This date is unavailable. Please choose another.");
-        dateField.value = "";
-      }
-    });
-
-    // Disable blacked-out times on page load
-    function filterTimes() {
-      const selectedDate = dateField.value;
-      const options = timeField.options;
-
-      for (let i = 0; i < options.length; i++) {
-        const time = options[i].value;
-        const isBlackout = blackoutTimes.some(entry => entry.date === selectedDate && entry.time === time);
-        options[i].disabled = isBlackout;
-      }
-    }
-
-    dateField.addEventListener("change", filterTimes);
-  </script>
+        dateField.addEventListener("input", () => {
+            if (blackoutDates.includes(dateField.value)) {
+                alert("This date is unavailable. Please choose another.");
+                dateField.value = "";
+            }
+        });
+    </script>
 </body>
 </html>
+
 
 
 
