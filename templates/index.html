@@ -17,6 +17,9 @@
         .btn-pink:hover {
             background-color: #ff3399;
         }
+        label {
+            color: #ff66cc;
+        }
     </style>
 </head>
 <body class="container py-5">
@@ -50,11 +53,9 @@
         <div class="mb-3">
             <label class="form-label">Time</label>
             <select name="time" class="form-select" required>
-                {% for hour in range(7, 23) %}
-                    <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour|ampm }}</option>
-                    <option value="{{ "%02d:30" % hour }}">{{ "%02d:30" % hour|ampm }}</option>
+                {% for time_24, time_display in times %}
+                    <option value="{{ time_24 }}">{{ time_display }}</option>
                 {% endfor %}
-                <option value="22:30">10:30 PM</option>
             </select>
         </div>
         <button type="submit" class="btn btn-pink w-100">Submit Request</button>
@@ -73,6 +74,7 @@
     </script>
 </body>
 </html>
+
 
 
 
