@@ -3,16 +3,19 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "your-secret-key"
+app.secret_key = "your-secret-key"  # Needed for session management
 
-# Jinja filter to format hours into AM/PM
-@app.template_filter('ampm')
-def ampm(time_str):
-    from datetime import datetime
-    dt = datetime.strptime(time_str, "%H:%M")
-    return dt.strftime("%-I:%M %p")  # Use %#I for Windows if %-I doesn't work
+# --- Utilities ---
+def load_requests():
+    try:
+        with open("client_requests.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
 
-
+def save_requests(data):
+    with open("client_requests.json", "w") as f:
+        json.dump(data, f, indent=4)
 
 # --- Landing Page ---
 @app.route('/')
@@ -28,14 +31,12 @@ def home():
     with open("visit_counter.json", "w") as f:
         json.dump(counter, f)
 
+    return render_template("home.html", visits=counter["visits"])
+
+# --- Client Booking Page ---
+@app.route('/book')
+def book():
     return render_template("index.html")
-
-
-
-# --- Client Form ---
-@app.route('/client')
-def client():
-    return render_template('index.html')  # was previously at '/'
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -55,16 +56,9 @@ def submit():
         "datetime": dt
     }
 
-    try:
-        with open("client_requests.json", "r") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        data = []
-
+    data = load_requests()
     data.append(new_request)
-
-    with open("client_requests.json", "w") as f:
-        json.dump(data, f, indent=4)
+    save_requests(data)
 
     return redirect(url_for('thank_you'))
 
@@ -72,22 +66,18 @@ def submit():
 def thank_you():
     return render_template("thank_you.html")
 
-
-# --- Admin Login ---
+# --- Admin Login & Dashboard ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         password = request.form['password']
-        if password == "adminpass":
+        if password == "adminpass":  # Change this securely for production
             session['admin'] = True
             return redirect(url_for('admin'))
         else:
-            # re-render the login form with error message
-            return render_template('login.html', error="Incorrect password")
-    return render_template('login.html')
+            return "<h3>Incorrect password</h3>"
+    return render_template("login.html")
 
-
-# --- Admin Dashboard ---
 @app.route('/admin')
 def admin():
     if not session.get('admin'):
@@ -102,68 +92,55 @@ def admin():
     except FileNotFoundError:
         visits = 0
 
-    return render_template('admin.html', requests=requests, visits=visits)
+    return render_template("admin.html", requests=requests, visits=visits)
 
+@app.route('/logout')
+def logout():
+    session.pop('admin', None)
+    return redirect(url_for('home'))
 
-# (app setup code...)
-
-# Load requests from JSON file
-def load_requests():
-    try:
-        with open("client_requests.json", "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-
-# Save requests to JSON file
-def save_requests(requests):
-    with open("client_requests.json", "w") as f:
-        json.dump(requests, f, indent=4)
-
-# DELETE route
+# --- Delete Appointment ---
 @app.route('/delete/<int:index>', methods=['POST'])
 def delete(index):
     if not session.get('admin'):
         return redirect(url_for('login'))
 
-    requests = load_requests()
-    if 0 <= index < len(requests):
-        del requests[index]
-        save_requests(requests)
+    data = load_requests()
+    if 0 <= index < len(data):
+        del data[index]
+        save_requests(data)
 
     return redirect(url_for('admin'))
 
-# EDIT form route
+# --- Edit Appointment ---
 @app.route('/edit/<int:index>', methods=['GET'])
 def edit(index):
     if not session.get('admin'):
         return redirect(url_for('login'))
 
-    requests = load_requests()
-    if 0 <= index < len(requests):
-        return render_template("edit.html", request=requests[index], index=index)
+    data = load_requests()
+    if 0 <= index < len(data):
+        return render_template("edit.html", request=data[index], index=index)
     return redirect(url_for('admin'))
 
-# UPDATE after editing
 @app.route('/update/<int:index>', methods=['POST'])
 def update(index):
     if not session.get('admin'):
         return redirect(url_for('login'))
 
-    requests = load_requests()
-    if 0 <= index < len(requests):
-        requests[index] = {
+    data = load_requests()
+    if 0 <= index < len(data):
+        data[index] = {
             "name": request.form['name'],
             "phone": request.form['phone'],
             "email": request.form['email'],
             "service": request.form['service'],
             "datetime": f"{request.form['date']} {request.form['time']}"
         }
-        save_requests(requests)
+        save_requests(data)
 
     return redirect(url_for('admin'))
 
-
+# --- Run App ---
 if __name__ == '__main__':
     app.run(debug=True)
-
