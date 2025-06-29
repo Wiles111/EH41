@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h2>Pending Appointment Requests</h2>
+    <ul>
+        {% for req in requests %}
+        <li>
+            {{ req.datetime }} - {{ req.name }} - {{ req.service }}
+            <br>Phone: {{ req.phone }} | Email: {{ req.email }}
+        </li>
+        {% else %}
+        <p>No requests found.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>
