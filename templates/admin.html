@@ -1,96 +1,36 @@
+
+<!-- templates/admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #121212;
-            color: #f8f9fa;
-        }
-        .admin-header {
-            color: #ff66cc;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .appointment-card {
-            background-color: #1f1f1f;
-            border: 1px solid #ff66cc;
-            color: #ff66cc;
-        }
-        .btn-pink {
-            background-color: #ff66cc;
-            color: white;
-        }
-        .btn-pink:hover {
-            background-color: #ff3399;
-        }
-        .btn-outline-pink {
-            border-color: #ff66cc;
-            color: #ff66cc;
-        }
-        .btn-outline-pink:hover {
-            background-color: #ff66cc;
-            color: white;
-        }
+        body { background-color: #121212; color: white; }
+        .card { background-color: #1f1f1f; margin-bottom: 15px; }
+        .card-title, .card-text { color: #ff66cc; }
+        .btn-pink { background-color: #ff66cc; border: none; color: white; }
+        .btn-pink:hover { background-color: #ff3399; }
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h2 class="admin-header">🌸 Admin Dashboard – Client Appointments</h2>
+<body class="container py-4">
+    <h2 class="text-center mb-4">Admin Dashboard</h2>
 
-        {% if requests %}
-            {% for request in requests %}
-                <div class="appointment-card p-3 rounded mb-4">
-                    <p><strong>Name:</strong> {{ request.name }}</p>
-                    <p><strong>Phone:</strong> {{ request.phone }}</p>
-                    <p><strong>Email:</strong> {{ request.email }}</p>
-                    <p><strong>Service:</strong> {{ request.service }}</p>
-                    <p><strong>Date/Time:</strong> {{ request.datetime }}</p>
-
-                    <!-- Edit and Delete Buttons -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <form action="/edit/{{ loop.index0 }}" method="get">
-                            <button type="submit" class="btn btn-outline-pink btn-sm">Edit</button>
-                        </form>
-                        <form action="/delete/{{ loop.index0 }}" method="post" onsubmit="return confirm('Delete this appointment?');">
-                            <button type="submit" class="btn btn-pink btn-sm">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-center text-muted">No appointment requests yet.</p>
-        {% endif %}
-
-        <div class="text-center mt-4">
-            <a href="/logout" class="btn btn-pink">Logout</a>
-        </div>
+    <div class="text-end mb-3">
+        <a href="/availability" class="btn btn-pink">Modify Availability</a>
     </div>
-<p class="text-center mt-4" style="color: #ff66cc;">
-    💻 Site Visits: {{ visits }}
-</p>
-<h4 class="mt-4">Black Out Dates</h4>
-<form action="/admin/blackout" method="post" class="d-flex gap-2">
-    <input type="date" name="blackout_date" class="form-control" required>
-    <button class="btn btn-warning" type="submit">Add</button>
-</form>
 
-<ul class="mt-3 text-light">
-    {% for d in blackouts %}
-        <li>
-            {{ d }}
-            <form action="/admin/remove_blackout/{{ d }}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-            </form>
-        </li>
-    {% else %}
-        <li>No blackout dates.</li>
+    {% for req in requests %}
+    <div class="card p-3">
+        <h5 class="card-title">{{ req.name }} - {{ req.service }}</h5>
+        <p class="card-text">{{ req.email }} | {{ req.phone }}</p>
+        <p class="card-text"><strong>Date & Time:</strong> {{ req.datetime }}</p>
+        <form method="post" action="/delete-request" style="display:inline;">
+            <input type="hidden" name="timestamp" value="{{ req.datetime }}">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    </div>
     {% endfor %}
-</ul>
-
-
 </body>
 </html>
