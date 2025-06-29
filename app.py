@@ -3,12 +3,17 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "your-secret-key"  # Needed for session management
+app.secret_key = "your-secret-key"
 
-# --- Routes ---
+# --- Landing Page ---
 @app.route('/')
-def index():
-    return render_template('index.html')
+def home():
+    return render_template('home.html')  # new file
+
+# --- Client Form ---
+@app.route('/client')
+def client():
+    return render_template('index.html')  # was previously at '/'
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -45,6 +50,7 @@ def submit():
 def thank_you():
     return "<h2>Thank you for your request! We'll contact you soon.</h2>"
 
+# --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -61,6 +67,7 @@ def login():
         </form>
     '''
 
+# --- Admin Dashboard ---
 @app.route('/admin')
 def admin():
     if not session.get('admin'):
@@ -74,3 +81,4 @@ def admin():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
