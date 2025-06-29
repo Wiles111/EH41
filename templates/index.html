@@ -1,66 +1,85 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Book Appointment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #111;
-            color: #fce4ec;
-            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: pink;
+            font-family: 'Raleway', sans-serif;
             text-align: center;
             padding: 30px;
         }
-        input, select {
-            margin: 10px;
-            padding: 10px;
-            border-radius: 5px;
+        form {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
         }
-        .submit-btn {
-            background-color: hotpink;
-            color: white;
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
             border: none;
-            padding: 12px 24px;
-            cursor: pointer;
             border-radius: 5px;
+            font-size: 1rem;
+        }
+        input[type="submit"] {
+            background-color: pink;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        h2 {
+            color: hotpink;
         }
     </style>
 </head>
 <body>
-    <h1>Book Your Appointment</h1>
-    <form method="POST" action="/submit">
-        <input type="text" name="name" placeholder="Name" required><br>
-        <input type="tel" name="phone" placeholder="Phone" required><br>
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="date" id="dateField" name="date" required><br>
-        <select name="time" required>
-            {% for hour in range(7, 23) %}
-                <option value="{{ "{:02d}:00".format(hour) }}">{{ "{:02d}:00 {}".format(hour if hour <= 12 else hour - 12, "AM" if hour < 12 else "PM") }}</option>
-                <option value="{{ "{:02d}:30".format(hour) }}">{{ "{:02d}:30 {}".format(hour if hour <= 12 else hour - 12, "AM" if hour < 12 else "PM") }}</option>
-            {% endfor %}
-        </select><br>
+    <h2>Book Your Appointment 💅</h2>
+    <form action="/submit" method="POST">
+        <input type="text" name="name" placeholder="Your Name" required>
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+        <input type="email" name="email" placeholder="Email Address" required>
+        
         <select name="service" required>
+            <option value="">Select Service</option>
+            <option value="Nails">Nails</option>
             <option value="Hair">Hair</option>
             <option value="Makeup">Makeup</option>
-        </select><br>
-        <input type="submit" class="submit-btn" value="Submit Request">
+        </select>
+        
+        <input type="date" name="date" id="dateField" required>
+
+        <select name="time" required>
+            <option value="">Select Time</option>
+            {% for time in time_options %}
+                <option value="{{ time }}">{{ time }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="submit" value="Submit Request 💖">
     </form>
 
     <script>
-        const blackoutDates = {{ blackouts.dates | tojson }};
-        const blackoutTimes = {{ blackouts.times | tojson }};
-        const dateInput = document.getElementById("dateField");
+        const blackoutData = {{ blackouts | tojson }};
+        const dateField = document.getElementById("dateField");
 
-        dateInput.addEventListener("input", () => {
-            if (blackoutDates.includes(dateInput.value)) {
-                alert("This date is unavailable.");
-                dateInput.value = "";
+        dateField.addEventListener("input", () => {
+            const selectedDate = dateField.value;
+            if (blackoutData.dates.includes(selectedDate)) {
+                alert("This date is unavailable. Please choose another.");
+                dateField.value = "";
             }
         });
     </script>
 </body>
 </html>
->
-
 
 
 
