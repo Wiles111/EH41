@@ -13,7 +13,14 @@ def home():
 # --- Client Form ---
 @app.route('/book')
 def book():
-    return render_template('index.html')
+    try:
+        with open("blackout_schedule.json", "r") as f:
+            blackouts = json.load(f)
+    except FileNotFoundError:
+        blackouts = {"dates": [], "times": []}
+
+    return render_template('index.html', blackouts=blackouts)
+
 
 @app.route('/submit', methods=['POST'])
 def submit():
