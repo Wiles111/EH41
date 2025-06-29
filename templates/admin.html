@@ -20,12 +20,20 @@
             border: 1px solid #ff66cc;
             color: #ff66cc;
         }
-        .btn-logout {
+        .btn-pink {
             background-color: #ff66cc;
             color: white;
         }
-        .btn-logout:hover {
+        .btn-pink:hover {
             background-color: #ff3399;
+        }
+        .btn-outline-pink {
+            border-color: #ff66cc;
+            color: #ff66cc;
+        }
+        .btn-outline-pink:hover {
+            background-color: #ff66cc;
+            color: white;
         }
     </style>
 </head>
@@ -41,6 +49,16 @@
                     <p><strong>Email:</strong> {{ request.email }}</p>
                     <p><strong>Service:</strong> {{ request.service }}</p>
                     <p><strong>Date/Time:</strong> {{ request.datetime }}</p>
+
+                    <!-- Edit and Delete Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <form action="/edit/{{ loop.index0 }}" method="get">
+                            <button type="submit" class="btn btn-outline-pink btn-sm">Edit</button>
+                        </form>
+                        <form action="/delete/{{ loop.index0 }}" method="post" onsubmit="return confirm('Delete this appointment?');">
+                            <button type="submit" class="btn btn-pink btn-sm">Delete</button>
+                        </form>
+                    </div>
                 </div>
             {% endfor %}
         {% else %}
@@ -48,10 +66,8 @@
         {% endif %}
 
         <div class="text-center mt-4">
-            <a href="/logout" class="btn btn-logout">Logout</a>
+            <a href="/logout" class="btn btn-pink">Logout</a>
         </div>
     </div>
 </body>
 </html>
-
-
