@@ -1,125 +1,76 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: #f5f5f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #ff69b4;
-      margin-bottom: 30px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .card p {
-      margin: 10px 0;
-      color: #ff69b4;
-    }
-
-    .button-group {
-      margin-top: 10px;
-    }
-
-    .btn {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 5px;
-      margin-right: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .approve {
-      background-color: #28a745;
-      color: white;
-    }
-
-    .edit {
-      background-color: #ffc107;
-      color: #121212;
-    }
-
-    .delete {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .modify-link {
-      display: block;
-      text-align: center;
-      margin-top: 30px;
-      font-size: 1.2em;
-      color: #ff69b4;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .modify-link:hover {
-      text-decoration: underline;
-    }
-
-    .visit-counter {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 1.1em;
-      color: #bbb;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: pink;
+            font-family: 'Raleway', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border: 1px solid pink;
+            margin: 20px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+        h2 {
+            color: hotpink;
+        }
+        button, a.button-link {
+            background-color: pink;
+            color: black;
+            padding: 8px 14px;
+            margin: 8px 6px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5%;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Admin Dashboard</h1>
-
-    {% if visits is defined %}
-      <div class="visit-counter">🌐 Site visits: {{ visits }}</div>
-    {% endif %}
+    <div class="top-bar">
+        <h2>Admin Dashboard 💼</h2>
+        <a class="button-link" href="{{ url_for('modify_availability') }}">Modify Availability</a>
+    </div>
 
     {% for r in requests %}
     <div class="card">
-      <p><strong>Name:</strong> {{ r.name }}</p>
-      <p><strong>Phone:</strong> {{ r.phone }}</p>
-      <p><strong>Email:</strong> {{ r.email }}</p>
-      <p><strong>Service:</strong> {{ r.service }}</p>
-      <p><strong>Date & Time:</strong> {{ r.datetime }}</p>
-      <div class="button-group">
-        <form method="POST" action="/approve" style="display:inline;">
-          <input type="hidden" name="datetime" value="{{ r.datetime }}">
-          <button class="btn approve" type="submit">Approve</button>
-        </form>
-        <form method="POST" action="/edit" style="display:inline;">
-          <input type="hidden" name="datetime" value="{{ r.datetime }}">
-          <button class="btn edit" type="submit">Edit</button>
-        </form>
-        <form method="POST" action="/delete" style="display:inline;">
-          <input type="hidden" name="datetime" value="{{ r.datetime }}">
-          <button class="btn delete" type="submit">Delete</button>
-        </form>
-      </div>
-    </div>
-    {% endfor %}
+        <p><strong>Name:</strong> {{ r.name }}</p>
+        <p><strong>Phone:</strong> {{ r.phone }}</p>
+        <p><strong>Email:</strong> {{ r.email }}</p>
+        <p><strong>Service:</strong> {{ r.service }}</p>
+        <p><strong>Requested:</strong> {{ r.datetime }}</p>
 
-    <a href="{{ url_for('modify_availability') }}" class="modify-link">Modify Availability</a>
-  </div>
+        <form action="{{ url_for('approve_request') }}" method="post" style="display:inline;">
+            <input type="hidden" name="datetime" value="{{ r.datetime }}">
+            <button type="submit">Approve</button>
+        </form>
+
+        <form action="{{ url_for('delete_request') }}" method="post" style="display:inline;">
+            <input type="hidden" name="datetime" value="{{ r.datetime }}">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+    {% else %}
+    <p>No appointment requests found.</p>
+    {% endfor %}
 </body>
 </html>
 
