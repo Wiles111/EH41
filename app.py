@@ -11,9 +11,9 @@ def home():
     return render_template('home.html')  # new file
 
 # --- Client Form ---
-@app.route('/client')
-def client():
-    return render_template('index.html')  # was previously at '/'
+@app.route('/book')
+def book():
+    return render_template('index.html')
 
 @app.route('/submit', methods=['POST'])
 def submit():
