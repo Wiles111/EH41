@@ -92,7 +92,7 @@ def admin():
     return render_template("admin.html", requests=requests, blackouts=blackout_data)
 
 # --- Approve Booking and Add to Blackout ---
-@app.route('/approve/<int:index>')
+@app.route('/approve/<int:index>', methods=['POST'])
 def approve(index):
     try:
         with open("client_requests.json", "r") as f:
