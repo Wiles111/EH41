@@ -1,0 +1,40 @@
+<!-- templates/availability.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modify Availability</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #121212; color: white; }
+        .btn-pink { background-color: #ff66cc; border: none; color: white; }
+        .btn-pink:hover { background-color: #ff3399; }
+        label { color: #ff66cc; }
+    </style>
+</head>
+<body class="container py-5">
+    <h3 class="text-center mb-4">Modify Availability</h3>
+
+    <form method="post" action="/availability">
+        <div class="mb-3">
+            <label>Date (to disable)</label>
+            <input type="date" name="date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Time (24-hr, e.g. 14:00)</label>
+            <input type="text" name="time" class="form-control" placeholder="Leave blank to disable entire date">
+        </div>
+        <button type="submit" class="btn btn-pink">Add Unavailable Slot</button>
+    </form>
+
+    <hr>
+    <h5>Current Unavailable Slots</h5>
+    <ul>
+        {% for date, times in blackout.items() %}
+            <li><strong>{{ date }}</strong>: {{ times | join(', ') }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="/admin" class="btn btn-secondary mt-4">Back to Dashboard</a>
+</body>
+</html>
