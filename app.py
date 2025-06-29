@@ -127,6 +127,11 @@ def modify_availability():
         with open("blackout.json", "w") as f:
             json.dump(blackout, f, indent=4)
 
+@app.route('/thank-you')
+def thank_you():
+    return render_template("thank_you.html")  # or a simple thank you message
+
+
     return render_template("availability.html", blackouts=blackout)
 
 if __name__ == '__main__':
