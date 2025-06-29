@@ -1,118 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Book Appointment 💋</title>
+    <title>Book Appointment</title>
     <style>
         body {
             background-color: #111;
-            color: #f8f8f8;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-        .container {
-            background-color: #1c1c1c;
-            padding: 30px 40px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
-        }
-        h1 {
+            color: #fce4ec;
+            font-family: Arial, sans-serif;
             text-align: center;
-            color: hotpink;
-            margin-bottom: 30px;
-        }
-        label {
-            display: block;
-            margin: 15px 0 5px;
+            padding: 30px;
         }
         input, select {
-            width: 100%;
+            margin: 10px;
             padding: 10px;
-            border: none;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            background-color: #333;
-            color: #fff;
+            border-radius: 5px;
         }
-        input[type="submit"] {
+        .submit-btn {
             background-color: hotpink;
-            color: black;
-            font-weight: bold;
+            color: white;
+            border: none;
+            padding: 12px 24px;
             cursor: pointer;
-            transition: 0.3s ease;
-        }
-        input[type="submit"]:hover {
-            background-color: deeppink;
-        }
-        .note {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #bbb;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Book an Appointment 💋</h1>
-        <form method="post" action="/submit">
-            <label for="name">Name:</label>
-            <input type="text" name="name" required>
-
-            <label for="phone">Phone:</label>
-            <input type="text" name="phone" required>
-
-            <label for="email">Email:</label>
-            <input type="email" name="email" required>
-
-            <label for="service">Service:</label>
-            <select name="service" required>
-                <option value="">-- Select --</option>
-                <option>Makeup</option>
-                <option>Lashes</option>
-                <option>Brows</option>
-                <option>Consultation</option>
-            </select>
-
-            <label for="date">Date:</label>
-            <input type="date" name="date" id="dateField" required>
-
-            <label for="time">Time:</label>
-            <select name="time" id="timeField" required>
-                <option value="">-- Select --</option>
-                {% for t in times %}
-                    {% if t not in blackout_times %}
-                        <option value="{{ t }}">{{ t }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-
-            <input type="submit" value="Submit Request 💌">
-        </form>
-
-        <div class="note">
-            Unavailable dates and times are disabled automatically.
-        </div>
-    </div>
+    <h1>Book Your Appointment</h1>
+    <form method="POST" action="/submit">
+        <input type="text" name="name" placeholder="Name" required><br>
+        <input type="tel" name="phone" placeholder="Phone" required><br>
+        <input type="email" name="email" placeholder="Email" required><br>
+        <input type="date" id="dateField" name="date" required><br>
+        <select name="time" required>
+            {% for hour in range(7, 23) %}
+                <option value="{{ "{:02d}:00".format(hour) }}">{{ "{:02d}:00 {}".format(hour if hour <= 12 else hour - 12, "AM" if hour < 12 else "PM") }}</option>
+                <option value="{{ "{:02d}:30".format(hour) }}">{{ "{:02d}:30 {}".format(hour if hour <= 12 else hour - 12, "AM" if hour < 12 else "PM") }}</option>
+            {% endfor %}
+        </select><br>
+        <select name="service" required>
+            <option value="Hair">Hair</option>
+            <option value="Makeup">Makeup</option>
+        </select><br>
+        <input type="submit" class="submit-btn" value="Submit Request">
+    </form>
 
     <script>
-        const blackoutDates = {{ blackout_dates | tojson }};
-        const dateField = document.getElementById("dateField");
+        const blackoutDates = {{ blackouts.dates | tojson }};
+        const blackoutTimes = {{ blackouts.times | tojson }};
+        const dateInput = document.getElementById("dateField");
 
-        dateField.addEventListener("input", () => {
-            if (blackoutDates.includes(dateField.value)) {
-                alert("This date is unavailable. Please choose another.");
-                dateField.value = "";
+        dateInput.addEventListener("input", () => {
+            if (blackoutDates.includes(dateInput.value)) {
+                alert("This date is unavailable.");
+                dateInput.value = "";
             }
         });
     </script>
 </body>
 </html>
+>
 
 
 
