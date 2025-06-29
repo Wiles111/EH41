@@ -55,7 +55,7 @@
                 <div class="mb-3">
                     <select name="time" class="form-select" required>
     <option disabled selected>Select Time</option>
-    {% for hour in range(7, 18) %}
+    {% for hour in range(7, 23) %}
         {% for minute in ['00', '30'] %}
             {% set time_24 = "%02d:%s" % (hour, minute) %}
             <option value="{{ time_24 }}">{{ time_24|ampm }}</option>
