@@ -1,79 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <style>
-        body {
-            background-color: #121212;
-            color: #ff69b4;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #ff69b4;
-        }
-        .card {
-            background-color: #1e1e1e;
-            border: 1px solid #ff69b4;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 10px #ff69b4;
-        }
-        .btn {
-            background-color: #ff69b4;
-            color: white;
-            padding: 8px 12px;
-            margin-right: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #e91e63;
-        }
-        .buttons {
-            margin-top: 10px;
-        }
-        a {
-            color: #ccc;
-            text-decoration: none;
-        }
-        a:hover {
-            color: #fff;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff69b4;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card p {
+      margin: 10px 0;
+      color: #ff69b4;
+    }
+
+    .button-group {
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      margin-right: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .approve {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .edit {
+      background-color: #ffc107;
+      color: #121212;
+    }
+
+    .delete {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .modify-link {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #ff69b4;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .modify-link:hover {
+      text-decoration: underline;
+    }
+
+    .visit-counter {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+      color: #bbb;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <h1>Admin Dashboard</h1>
 
-    {% if requests %}
-        {% for req in requests %}
-            <div class="card">
-                <strong>Name:</strong> {{ req.name }}<br>
-                <strong>Phone:</strong> {{ req.phone }}<br>
-                <strong>Email:</strong> {{ req.email }}<br>
-                <strong>Service:</strong> {{ req.service }}<br>
-                <strong>Date & Time:</strong> {{ req.datetime }}<br>
-
-                <div class="buttons">
-                    <form action="{{ url_for('approve', index=loop.index0) }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn">Approve</button>
-                    </form>
-                    <form action="{{ url_for('delete_request', index=loop.index0) }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn">Delete</button>
-                    </form>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No requests found.</p>
+    {% if visits is defined %}
+      <div class="visit-counter">🌐 Site visits: {{ visits }}</div>
     {% endif %}
 
-    <p style="text-align:center;">
-        <a href="{{ url_for('modify_availability') }}">Modify Availability</a>
-    </p>
+    {% for r in requests %}
+    <div class="card">
+      <p><strong>Name:</strong> {{ r.name }}</p>
+      <p><strong>Phone:</strong> {{ r.phone }}</p>
+      <p><strong>Email:</strong> {{ r.email }}</p>
+      <p><strong>Service:</strong> {{ r.service }}</p>
+      <p><strong>Date & Time:</strong> {{ r.datetime }}</p>
+      <div class="button-group">
+        <form method="POST" action="/approve" style="display:inline;">
+          <input type="hidden" name="datetime" value="{{ r.datetime }}">
+          <button class="btn approve" type="submit">Approve</button>
+        </form>
+        <form method="POST" action="/edit" style="display:inline;">
+          <input type="hidden" name="datetime" value="{{ r.datetime }}">
+          <button class="btn edit" type="submit">Edit</button>
+        </form>
+        <form method="POST" action="/delete" style="display:inline;">
+          <input type="hidden" name="datetime" value="{{ r.datetime }}">
+          <button class="btn delete" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+
+    <a href="{{ url_for('modify_availability') }}" class="modify-link">Modify Availability</a>
+  </div>
 </body>
 </html>
+
