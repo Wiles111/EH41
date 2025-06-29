@@ -1,36 +1,79 @@
-
-<!-- templates/admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: white; }
-        .card { background-color: #1f1f1f; margin-bottom: 15px; }
-        .card-title, .card-text { color: #ff66cc; }
-        .btn-pink { background-color: #ff66cc; border: none; color: white; }
-        .btn-pink:hover { background-color: #ff3399; }
+        body {
+            background-color: #121212;
+            color: #ff69b4;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #ff69b4;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border: 1px solid #ff69b4;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px #ff69b4;
+        }
+        .btn {
+            background-color: #ff69b4;
+            color: white;
+            padding: 8px 12px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #e91e63;
+        }
+        .buttons {
+            margin-top: 10px;
+        }
+        a {
+            color: #ccc;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #fff;
+        }
     </style>
 </head>
-<body class="container py-4">
-    <h2 class="text-center mb-4">Admin Dashboard</h2>
+<body>
+    <h1>Admin Dashboard</h1>
 
-    <div class="text-end mb-3">
-        <a href="/availability" class="btn btn-pink">Modify Availability</a>
-    </div>
+    {% if requests %}
+        {% for req in requests %}
+            <div class="card">
+                <strong>Name:</strong> {{ req.name }}<br>
+                <strong>Phone:</strong> {{ req.phone }}<br>
+                <strong>Email:</strong> {{ req.email }}<br>
+                <strong>Service:</strong> {{ req.service }}<br>
+                <strong>Date & Time:</strong> {{ req.datetime }}<br>
 
-    {% for req in requests %}
-    <div class="card p-3">
-        <h5 class="card-title">{{ req.name }} - {{ req.service }}</h5>
-        <p class="card-text">{{ req.email }} | {{ req.phone }}</p>
-        <p class="card-text"><strong>Date & Time:</strong> {{ req.datetime }}</p>
-        <form method="post" action="/delete-request" style="display:inline;">
-            <input type="hidden" name="timestamp" value="{{ req.datetime }}">
-            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-        </form>
-    </div>
-    {% endfor %}
+                <div class="buttons">
+                    <form action="{{ url_for('approve', index=loop.index0) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn">Approve</button>
+                    </form>
+                    <form action="{{ url_for('delete_request', index=loop.index0) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No requests found.</p>
+    {% endif %}
+
+    <p style="text-align:center;">
+        <a href="{{ url_for('availability') }}">Modify Availability</a>
+    </p>
 </body>
 </html>
