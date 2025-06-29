@@ -22,6 +22,37 @@ def book():
             json.dump(blackouts, f, indent=4)
 
     return render_template('index.html', blackouts=blackouts)
+    
+@app.route('/approve/<int:index>', methods=['POST'])
+def approve(index):
+    try:
+        with open("client_requests.json", "r") as f:
+            requests = json.load(f)
+        request_to_approve = requests[index]
+
+        # Extract date portion only
+        appointment_date = request_to_approve["datetime"].split()[0]
+
+        # Load or initialize blackout file
+        try:
+            with open("blackouts.json", "r") as f:
+                blackouts = json.load(f)
+        except FileNotFoundError:
+            blackouts = {"dates": [], "times": []}
+
+        # Add to blackout dates if not already present
+        if appointment_date not in blackouts["dates"]:
+            blackouts["dates"].append(appointment_date)
+
+        # Save updated blackout file
+        with open("blackouts.json", "w") as f:
+            json.dump(blackouts, f, indent=4)
+
+        return redirect(url_for('admin'))
+
+    except Exception as e:
+        return f"Error approving request: {str(e)}"
+
 
 
 
