@@ -5,6 +5,29 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import json
 from datetime import datetime
 
+def send_email(subject, body):
+    sender_email = "Evelyn.hache41@outlook.com"
+    receiver_email = "Evelyn.hache41@outlook.com"
+    password = "evelynhache41"  # Use App Password (not your Gmail password)
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.send_message(msg)
+        server.quit()
+        print("Email sent!")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
 
@@ -66,6 +89,11 @@ def submit():
     requests.append(new_request)
     save_json("client_requests.json", requests)
     return redirect(url_for('thank_you'))
+    send_email(
+    subject="New Appointment Booked",
+    body=f"New appointment from {name}\nService: {service}\nDate & Time: {dt}"
+)
+
 
 @app.route('/thank-you')
 def thank_you():
