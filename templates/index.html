@@ -72,3 +72,17 @@
     </div>
 </body>
 </html>
+<input type="date" name="date" class="form-control" id="dateField" required>
+
+<script>
+    const blackoutDates = {{ blackouts|tojson }};
+    const dateField = document.getElementById("dateField");
+
+    dateField.addEventListener("input", () => {
+        if (blackoutDates.includes(dateField.value)) {
+            alert("This date is unavailable. Please choose another.");
+            dateField.value = "";
+        }
+    });
+</script>
+
