@@ -1,82 +1,90 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Book Appointment</title>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #121212;
+            background-color: black;
             color: pink;
-            font-family: 'Raleway', sans-serif;
+            font-family: Arial, sans-serif;
             text-align: center;
-            padding: 30px;
         }
-        form {
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            margin: auto;
-        }
-        input, select {
-            width: 100%;
+        input, select, button {
             padding: 10px;
-            margin: 10px 0;
-            border: none;
+            margin: 10px;
             border-radius: 5px;
-            font-size: 1rem;
+            border: none;
+            font-size: 1em;
         }
-        input[type="submit"] {
+        .submit-btn {
             background-color: pink;
             color: black;
-            font-weight: bold;
             cursor: pointer;
-        }
-        h2 {
-            color: hotpink;
         }
     </style>
 </head>
 <body>
-    <h2>Book Your Appointment 💅</h2>
-    <form action="/submit" method="POST">
-        <input type="text" name="name" placeholder="Your Name" required>
-        <input type="tel" name="phone" placeholder="Phone Number" required>
-        <input type="email" name="email" placeholder="Email Address" required>
-        
+    <h1>Book an Appointment 💅</h1>
+    <form method="POST" action="/submit">
+        <input type="text" name="name" placeholder="Full Name" required><br>
+        <input type="tel" name="phone" placeholder="Phone Number" required><br>
+        <input type="email" name="email" placeholder="Email Address" required><br>
         <select name="service" required>
             <option value="">Select Service</option>
-            <option value="Nails">Nails</option>
-            <option value="Hair">Hair</option>
-            <option value="Makeup">Makeup</option>
-        </select>
-        
-        <input type="date" name="date" id="dateField" required>
+            <option>Haircut</option>
+            <option>Hair Color</option>
+            <option>Makeup</option>
+            <option>Nails</option>
+        </select><br>
+        <input type="date" name="date" id="dateField" required><br>
 
-        <select name="time" required>
+        <select name="time" id="timeField" required>
             <option value="">Select Time</option>
-            {% for time in time_options %}
-                <option value="{{ time }}">{{ time }}</option>
-            {% endfor %}
-        </select>
+        </select><br>
 
-        <input type="submit" value="Submit Request 💖">
+        <button type="submit" class="submit-btn">Submit Request</button>
     </form>
 
     <script>
-        const blackoutData = {{ blackouts | tojson }};
-        const dateField = document.getElementById("dateField");
+        // Predefined blackout dates and times from Flask
+        const blackoutDates = {{ blackouts.get("dates", []) | tojson }};
+        const blackoutTimes = {{ blackouts.get("times", []) | tojson }};
 
+        // Block blackout dates
+        const dateField = document.getElementById("dateField");
         dateField.addEventListener("input", () => {
-            const selectedDate = dateField.value;
-            if (blackoutData.dates.includes(selectedDate)) {
+            if (blackoutDates.includes(dateField.value)) {
                 alert("This date is unavailable. Please choose another.");
                 dateField.value = "";
             }
         });
+
+        // Generate 30-minute time slots from 7:00 AM to 10:30 PM
+        function generateTimeOptions() {
+            const timeField = document.getElementById("timeField");
+            timeField.innerHTML = '<option value="">Select Time</option>'; // Clear old options
+
+            const start = 7 * 60;    // 7:00 AM in minutes
+            const end = 22 * 60 + 30; // 10:30 PM in minutes
+
+            for (let minutes = start; minutes <= end; minutes += 30) {
+                const hour = Math.floor(minutes / 60);
+                const minute = minutes % 60;
+                const ampm = hour >= 12 ? "PM" : "AM";
+                const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+                const timeString = `${String(displayHour)}:${minute === 0 ? "00" : minute} ${ampm}`;
+
+                if (!blackoutTimes.includes(timeString)) {
+                    const option = document.createElement("option");
+                    option.value = timeString;
+                    option.textContent = timeString;
+                    timeField.appendChild(option);
+                }
+            }
+        }
+
+        generateTimeOptions();
     </script>
 </body>
 </html>
