@@ -5,28 +5,25 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
 
-# --- Utilities ---
-def load_blackouts():
+# Utility function to load blackout data
+def load_blackout_data():
     try:
         with open("blackout.json", "r") as f:
-            return json.load(f)
+            data = json.load(f)
     except FileNotFoundError:
-        return {"dates": [], "times": []}
+        data = {"dates": [], "times": []}
+    return data
 
-def save_blackouts(data):
-    with open("blackout.json", "w") as f:
-        json.dump(data, f, indent=4)
-
-# --- Landing Page ---
+# --- Home Landing Page ---
 @app.route('/')
 def home():
-    return render_template("home.html")
+    return render_template('home.html')
 
-# --- Client Booking ---
-@app.route('/client')
-def client():
-    blackouts = load_blackouts()
-    return render_template("index.html", blackouts=blackouts)
+# --- Client Booking Page ---
+@app.route('/book')
+def book():
+    blackouts = load_blackout_data()
+    return render_template('index.html', blackouts=blackouts)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -43,7 +40,9 @@ def submit():
         "phone": phone,
         "email": email,
         "service": service,
-        "datetime": dt
+        "datetime": dt,
+        "date": date,
+        "time": time
     }
 
     try:
@@ -70,7 +69,7 @@ def login():
         if request.form['password'] == "adminpass":
             session['admin'] = True
             return redirect(url_for('admin'))
-        return render_template("login.html", error="Incorrect password")
+        return "<h3>Incorrect password</h3>"
     return render_template("login.html")
 
 # --- Admin Dashboard ---
@@ -78,69 +77,51 @@ def login():
 def admin():
     if not session.get('admin'):
         return redirect(url_for('login'))
-
     try:
         with open("client_requests.json", "r") as f:
             requests = json.load(f)
     except FileNotFoundError:
         requests = []
+    blackout_data = load_blackout_data()
+    return render_template("admin.html", requests=requests, blackouts=blackout_data)
 
-    return render_template("admin.html", requests=requests)
-
+# --- Approve Booking and Add to Blackout ---
 @app.route('/approve/<int:index>')
 def approve(index):
     try:
         with open("client_requests.json", "r") as f:
             data = json.load(f)
-
         approved = data[index]
-        date, time = approved['datetime'].split()
-        blackouts = load_blackouts()
-        if date not in blackouts['dates']:
-            blackouts['dates'].append(date)
-        if time not in blackouts['times']:
-            blackouts['times'].append(time)
-        save_blackouts(blackouts)
-
+        blackout = load_blackout_data()
+        blackout["dates"].append(approved["date"])
+        blackout["times"].append(approved["time"])
+        with open("blackout.json", "w") as f:
+            json.dump(blackout, f, indent=4)
+        return redirect(url_for('admin'))
     except Exception as e:
-        print(f"Error approving request: {e}")
-    return redirect(url_for('admin'))
+        return f"Error approving: {e}"
 
-@app.route('/delete/<int:index>')
-def delete(index):
-    try:
-        with open("client_requests.json", "r") as f:
-            data = json.load(f)
-
-        data.pop(index)
-
-        with open("client_requests.json", "w") as f:
-            json.dump(data, f, indent=4)
-    except Exception as e:
-        print(f"Error deleting request: {e}")
-    return redirect(url_for('admin'))
-
-# --- Modify Availability ---
+# --- Modify Availability Page ---
 @app.route('/availability', methods=['GET', 'POST'])
 def modify_availability():
     if not session.get('admin'):
         return redirect(url_for('login'))
 
-    blackouts = load_blackouts()
+    blackout = load_blackout_data()
 
     if request.method == 'POST':
-        date = request.form.get('date')
-        time = request.form.get('time')
+        new_date = request.form.get("blackout_date")
+        new_time = request.form.get("blackout_time")
 
-        if date and date not in blackouts['dates']:
-            blackouts['dates'].append(date)
-        if time and time not in blackouts['times']:
-            blackouts['times'].append(time)
+        if new_date and new_date not in blackout["dates"]:
+            blackout["dates"].append(new_date)
+        if new_time and new_time not in blackout["times"]:
+            blackout["times"].append(new_time)
 
-        save_blackouts(blackouts)
-        return redirect(url_for('modify_availability'))
+        with open("blackout.json", "w") as f:
+            json.dump(blackout, f, indent=4)
 
-    return render_template("availability.html", blackouts=blackouts)
+    return render_template("availability.html", blackouts=blackout)
 
 if __name__ == '__main__':
     app.run(debug=True)
