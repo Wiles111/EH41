@@ -35,16 +35,25 @@ def submit():
     time = request.form['time']
     dt = f"{date} {time}"
 
+    # --- Load blackout dates/times ---
+    try:
+        with open("blackout.json", "r") as f:
+            blackout_data = json.load(f)
+    except FileNotFoundError:
+        blackout_data = {"dates": [], "times": []}
+
+    if date in blackout_data.get("dates", []) or time in blackout_data.get("times", []):
+        return "<h3 style='color: pink; background-color: black; text-align: center;'>This appointment slot is unavailable. Please <a href='/client'>try again</a>.</h3>"
+
     new_request = {
         "name": name,
         "phone": phone,
         "email": email,
         "service": service,
-        "datetime": dt,
-        "date": date,
-        "time": time
+        "datetime": dt
     }
 
+    # --- Load and save client requests ---
     try:
         with open("client_requests.json", "r") as f:
             data = json.load(f)
@@ -58,9 +67,6 @@ def submit():
 
     return redirect(url_for('thank_you'))
 
-@app.route('/thank-you')
-def thank_you():
-    return render_template("thank_you.html")
 
 # --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
