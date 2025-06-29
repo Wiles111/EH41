@@ -56,10 +56,13 @@
                     <select name="time" class="form-select" required>
     <option disabled selected>Select Time</option>
     {% for hour in range(7, 18) %}
-        <option value="{{ '%02d:00' % hour }}">{{ hour|format_ampm }}:00</option>
-        <option value="{{ '%02d:30' % hour }}">{{ hour|format_ampm }}:30</option>
+        {% for minute in ['00', '30'] %}
+            {% set time_24 = "%02d:%s" % (hour, minute) %}
+            <option value="{{ time_24 }}">{{ time_24|ampm }}</option>
+        {% endfor %}
     {% endfor %}
 </select>
+
 
 
                 </div>
