@@ -97,6 +97,69 @@ def admin():
         requests = []
     return render_template('admin.html', requests=requests)
 
+from flask import Flask, render_template, request, redirect, url_for, session
+import json
+from datetime import datetime
+
+# (app setup code...)
+
+# Load requests from JSON file
+def load_requests():
+    try:
+        with open("client_requests.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+# Save requests to JSON file
+def save_requests(requests):
+    with open("client_requests.json", "w") as f:
+        json.dump(requests, f, indent=4)
+
+# DELETE route
+@app.route('/delete/<int:index>', methods=['POST'])
+def delete(index):
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    requests = load_requests()
+    if 0 <= index < len(requests):
+        del requests[index]
+        save_requests(requests)
+
+    return redirect(url_for('admin'))
+
+# EDIT form route
+@app.route('/edit/<int:index>', methods=['GET'])
+def edit(index):
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    requests = load_requests()
+    if 0 <= index < len(requests):
+        return render_template("edit.html", request=requests[index], index=index)
+    return redirect(url_for('admin'))
+
+# UPDATE after editing
+@app.route('/update/<int:index>', methods=['POST'])
+def update(index):
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    requests = load_requests()
+    if 0 <= index < len(requests):
+        requests[index] = {
+            "name": request.form['name'],
+            "phone": request.form['phone'],
+            "email": request.form['email'],
+            "service": request.form['service'],
+            "datetime": f"{request.form['date']} {request.form['time']}"
+        }
+        save_requests(requests)
+
+    return redirect(url_for('admin'))
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
