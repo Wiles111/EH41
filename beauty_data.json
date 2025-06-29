@@ -1,0 +1,21 @@
+{
+    "clients": [
+        {
+            "name": "Derek Wiles",
+            "phone": "614-296-7754",
+            "email": "derek.m.wiles@gmail.com"
+        },
+        {
+            "name": "Derek Wiles",
+            "phone": "614-296-7754",
+            "email": "derek.m.wiles@gmail.com"
+        }
+    ],
+    "appointments": [
+        {
+            "client": "Derek Wiles",
+            "service": "Lip Filler",
+            "datetime": "2025-07-03 13:00"
+        }
+    ]
+}
