@@ -18,8 +18,11 @@ def book():
             blackouts = json.load(f)
     except FileNotFoundError:
         blackouts = {"dates": [], "times": []}
+        with open("blackout_schedule.json", "w") as f:
+            json.dump(blackouts, f, indent=4)
 
     return render_template('index.html', blackouts=blackouts)
+
 
 
 @app.route('/submit', methods=['POST'])
