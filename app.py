@@ -91,16 +91,18 @@ def login():
 def admin():
     if not session.get('admin'):
         return redirect(url_for('login'))
-    try:
-        with open("client_requests.json", "r") as f:
-            requests = json.load(f)
-    except FileNotFoundError:
-        requests = []
-    return render_template('admin.html', requests=requests)
 
-from flask import Flask, render_template, request, redirect, url_for, session
-import json
-from datetime import datetime
+    requests = load_requests()
+
+    try:
+        with open("visit_counter.json", "r") as f:
+            counter = json.load(f)
+            visits = counter.get("visits", 0)
+    except FileNotFoundError:
+        visits = 0
+
+    return render_template('admin.html', requests=requests, visits=visits)
+
 
 # (app setup code...)
 
