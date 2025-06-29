@@ -3,6 +3,15 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
+# Register a custom Jinja2 filter to convert 24h time to 12h AM/PM
+@app.template_filter('ampm')
+def ampm_filter(time_str):
+    try:
+        t = datetime.strptime(time_str, "%H:%M")
+        return t.strftime("%I:%M %p").lstrip('0')
+    except ValueError:
+        return time_str  # fallback if something goes wrong
+
 app.secret_key = "your-secret-key"  # Needed for session management
 
 # --- Utilities ---
