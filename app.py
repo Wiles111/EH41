@@ -3,16 +3,16 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
-# Register a custom Jinja2 filter to convert 24h time to 12h AM/PM
+app.secret_key = "your-secret-key"
+
+# --- Jinja2 Filter ---
 @app.template_filter('ampm')
 def ampm_filter(time_str):
     try:
         t = datetime.strptime(time_str, "%H:%M")
         return t.strftime("%I:%M %p").lstrip('0')
     except ValueError:
-        return time_str  # fallback if something goes wrong
-
-app.secret_key = "your-secret-key"  # Needed for session management
+        return time_str
 
 # --- Utilities ---
 def load_requests():
@@ -25,6 +25,17 @@ def load_requests():
 def save_requests(data):
     with open("client_requests.json", "w") as f:
         json.dump(data, f, indent=4)
+
+def load_blackouts():
+    try:
+        with open("blackout_dates.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def save_blackouts(dates):
+    with open("blackout_dates.json", "w") as f:
+        json.dump(dates, f, indent=4)
 
 # --- Landing Page ---
 @app.route('/')
@@ -42,10 +53,11 @@ def home():
 
     return render_template("home.html", visits=counter["visits"])
 
-# --- Client Booking Page ---
+# --- Book Appointment ---
 @app.route('/book')
 def book():
-    return render_template("index.html")
+    blackouts = load_blackouts()
+    return render_template("index.html", blackouts=blackouts)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -75,40 +87,40 @@ def submit():
 def thank_you():
     return render_template("thank_you.html")
 
-# --- Admin Login & Dashboard ---
+# --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         password = request.form['password']
-        if password == "adminpass":  # Change this securely for production
+        if password == "adminpass":
             session['admin'] = True
             return redirect(url_for('admin'))
         else:
             return "<h3>Incorrect password</h3>"
     return render_template("login.html")
 
+@app.route('/logout')
+def logout():
+    session.pop('admin', None)
+    return redirect(url_for('home'))
+
+# --- Admin Dashboard ---
 @app.route('/admin')
 def admin():
     if not session.get('admin'):
         return redirect(url_for('login'))
 
     requests = load_requests()
-
+    visits = 0
     try:
         with open("visit_counter.json", "r") as f:
-            counter = json.load(f)
-            visits = counter.get("visits", 0)
+            visits = json.load(f).get("visits", 0)
     except FileNotFoundError:
-        visits = 0
+        pass
 
-    return render_template("admin.html", requests=requests, visits=visits)
+    blackouts = load_blackouts()
+    return render_template("admin.html", requests=requests, visits=visits, blackouts=blackouts)
 
-@app.route('/logout')
-def logout():
-    session.pop('admin', None)
-    return redirect(url_for('home'))
-
-# --- Delete Appointment ---
 @app.route('/delete/<int:index>', methods=['POST'])
 def delete(index):
     if not session.get('admin'):
@@ -121,24 +133,13 @@ def delete(index):
 
     return redirect(url_for('admin'))
 
-# --- Edit Appointment ---
-@app.route('/edit/<int:index>', methods=['GET'])
+@app.route('/edit/<int:index>', methods=['GET', 'POST'])
 def edit(index):
     if not session.get('admin'):
         return redirect(url_for('login'))
 
     data = load_requests()
-    if 0 <= index < len(data):
-        return render_template("edit.html", request=data[index], index=index)
-    return redirect(url_for('admin'))
-
-@app.route('/update/<int:index>', methods=['POST'])
-def update(index):
-    if not session.get('admin'):
-        return redirect(url_for('login'))
-
-    data = load_requests()
-    if 0 <= index < len(data):
+    if request.method == 'POST':
         data[index] = {
             "name": request.form['name'],
             "phone": request.form['phone'],
@@ -147,9 +148,36 @@ def update(index):
             "datetime": f"{request.form['date']} {request.form['time']}"
         }
         save_requests(data)
+        return redirect(url_for('admin'))
+
+    return render_template("edit.html", request=data[index], index=index)
+
+# --- Blackout Dates ---
+@app.route('/admin/blackout', methods=['POST'])
+def add_blackout():
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    new_date = request.form['blackout_date']
+    dates = load_blackouts()
+    if new_date not in dates:
+        dates.append(new_date)
+        save_blackouts(dates)
 
     return redirect(url_for('admin'))
 
-# --- Run App ---
+@app.route('/admin/remove_blackout/<date>', methods=['POST'])
+def remove_blackout(date):
+    if not session.get('admin'):
+        return redirect(url_for('login'))
+
+    dates = load_blackouts()
+    if date in dates:
+        dates.remove(date)
+        save_blackouts(dates)
+
+    return redirect(url_for('admin'))
+
+# --- Run the App ---
 if __name__ == '__main__':
     app.run(debug=True)
