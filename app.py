@@ -69,7 +69,8 @@ def submit():
 
 @app.route('/thank-you')
 def thank_you():
-    return "<h2>Thank you for your request! We'll contact you soon.</h2>"
+    return render_template("thank_you.html")
+
 
 # --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
