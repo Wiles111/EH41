@@ -17,7 +17,19 @@ def ampm(time_str):
 # --- Landing Page ---
 @app.route('/')
 def home():
-    return render_template('home.html')  # new file
+    try:
+        with open("visit_counter.json", "r") as f:
+            counter = json.load(f)
+    except FileNotFoundError:
+        counter = {"visits": 0}
+
+    counter["visits"] += 1
+
+    with open("visit_counter.json", "w") as f:
+        json.dump(counter, f)
+
+    return render_template("home.html", visits=counter["visits"])
+
 
 # --- Client Form ---
 @app.route('/client')
