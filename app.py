@@ -36,22 +36,24 @@ def submit():
     dt = f"{date} {time}"
 
     # --- Load blackout dates/times ---
-    try:
-        with open("blackout.json", "r") as f:
-            blackout_data = json.load(f)
-    except FileNotFoundError:
-        blackout_data = {"dates": [], "times": []}
+   # --- Load blackout dates/times ---
+try:
+    with open("blackout.json", "r") as f:
+        blackout_data = json.load(f)
+except FileNotFoundError:
+    blackout_data = {"dates": [], "times": [], "datetimes": []}
 
-    if date in blackout_data.get("dates", []) or time in blackout_data.get("times", []):
-        return "<h3 style='color: pink; background-color: black; text-align: center;'>This appointment slot is unavailable. Please <a href='/client'>try again</a>.</h3>"
+# Construct the datetime string
+dt = f"{date} {time}"
 
-    new_request = {
-        "name": name,
-        "phone": phone,
-        "email": email,
-        "service": service,
-        "datetime": dt
-    }
+# Check blackout conditions
+if (
+    date in blackout_data.get("dates", []) or
+    time in blackout_data.get("times", []) or
+    dt in blackout_data.get("datetimes", [])
+):
+    return "<h3 style='color: pink; background-color: black; text-align: center;'>This appointment slot is unavailable. Please <a href='/book'>try again</a>.</h3>"
+
 
     # --- Load and save client requests ---
     try:
