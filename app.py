@@ -59,13 +59,10 @@ def login():
             session['admin'] = True
             return redirect(url_for('admin'))
         else:
-            return "<h3>Incorrect password</h3>"
-    return '''
-        <form method="post">
-            <input type="password" name="password" placeholder="Enter admin password" required>
-            <input type="submit" value="Login">
-        </form>
-    '''
+            # re-render the login form with error message
+            return render_template('login.html', error="Incorrect password")
+    return render_template('login.html')
+
 
 # --- Admin Dashboard ---
 @app.route('/admin')
