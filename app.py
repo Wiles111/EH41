@@ -38,7 +38,16 @@ def home():
 @app.route('/book')
 def book():
     blackouts = load_json("blackout_dates.json", [])
-    return render_template("index.html", blackouts=blackouts)
+
+    # Generate 30-minute time slots from 7:00 AM to 10:30 PM
+    times = []
+    for hour in range(7, 23):
+        times.append(("%02d:00" % hour, datetime.strptime(f"{hour}:00", "%H:%M").strftime("%I:%M %p").lstrip("0")))
+        times.append(("%02d:30" % hour, datetime.strptime(f"{hour}:30", "%H:%M").strftime("%I:%M %p").lstrip("0")))
+    times.append(("22:30", "10:30 PM"))
+
+    return render_template("index.html", blackouts=blackouts, times=times)
+
 
 @app.route('/submit', methods=['POST'])
 def submit():
