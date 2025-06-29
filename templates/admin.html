@@ -9,38 +9,49 @@
             background-color: #121212;
             color: #f8f9fa;
         }
-        .card {
-            background-color: #1f1f1f;
-            border-color: #2c2c2c;
-        }
-        .card-title {
+        .admin-header {
             color: #ff66cc;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .appointment-card {
+            background-color: #1f1f1f;
+            border: 1px solid #ff66cc;
+            color: #ff66cc;
+        }
+        .btn-logout {
+            background-color: #ff66cc;
+            color: white;
+        }
+        .btn-logout:hover {
+            background-color: #ff3399;
         }
     </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center fw-bold mb-4">💼 Admin Dashboard</h1>
+        <h2 class="admin-header">🌸 Admin Dashboard – Client Appointments</h2>
+
         {% if requests %}
-            <div class="row">
-                {% for req in requests %}
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm p-3">
-                        <h5 class="card-title">{{ req.name }}</h5>
-                        <p class="card-text">
-                            <strong>Service:</strong> {{ req.service }}<br>
-                            <strong>Date/Time:</strong> {{ req.datetime }}<br>
-                            <strong>Phone:</strong> {{ req.phone }}<br>
-                            <strong>Email:</strong> {{ req.email }}
-                        </p>
-                    </div>
+            {% for request in requests %}
+                <div class="appointment-card p-3 rounded mb-4">
+                    <p><strong>Name:</strong> {{ request.name }}</p>
+                    <p><strong>Phone:</strong> {{ request.phone }}</p>
+                    <p><strong>Email:</strong> {{ request.email }}</p>
+                    <p><strong>Service:</strong> {{ request.service }}</p>
+                    <p><strong>Date/Time:</strong> {{ request.datetime }}</p>
                 </div>
-                {% endfor %}
-            </div>
+            {% endfor %}
         {% else %}
-            <p class="text-center">No appointment requests found.</p>
+            <p class="text-center text-muted">No appointment requests yet.</p>
         {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="/logout" class="btn btn-logout">Logout</a>
+        </div>
     </div>
 </body>
 </html>
+
 
