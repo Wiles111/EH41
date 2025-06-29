@@ -117,6 +117,58 @@ def admin():
         requests = []
     return render_template('admin.html', requests=requests)
 
+from flask import flash  # Optional: for future feedback messages
+
+# Route to approve a request (adds date to blackout list)
+@app.route('/approve/<int:index>', methods=['POST'])
+def approve(index):
+    try:
+        with open("client_requests.json", "r") as f:
+            requests = json.load(f)
+        selected = requests[index]
+        date_only = selected["datetime"].split()[0]
+
+        # Load or create blackout file
+        try:
+            with open("blackouts.json", "r") as f:
+                blackouts = json.load(f)
+        except FileNotFoundError:
+            blackouts = {"dates": [], "times": []}
+
+        if date_only not in blackouts["dates"]:
+            blackouts["dates"].append(date_only)
+
+        with open("blackouts.json", "w") as f:
+            json.dump(blackouts, f, indent=4)
+
+        return redirect(url_for('admin'))
+    except Exception as e:
+        return f"Error approving request: {e}"
+
+# Route to delete a request
+@app.route('/delete/<int:index>', methods=['POST'])
+def delete_request(index):
+    try:
+        with open("client_requests.json", "r") as f:
+            requests = json.load(f)
+        requests.pop(index)
+        with open("client_requests.json", "w") as f:
+            json.dump(requests, f, indent=4)
+        return redirect(url_for('admin'))
+    except Exception as e:
+        return f"Error deleting request: {e}"
+
+# Route to modify availability
+@app.route('/availability')
+def availability():
+    try:
+        with open("blackouts.json", "r") as f:
+            blackouts = json.load(f)
+    except FileNotFoundError:
+        blackouts = {"dates": [], "times": []}
+    return render_template("availability.html", blackouts=blackouts)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
