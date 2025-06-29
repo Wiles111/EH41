@@ -11,7 +11,7 @@ def load_blackout_data():
         with open("blackout.json", "r") as f:
             data = json.load(f)
     except FileNotFoundError:
-        data = {"dates": [], "times": []}
+        data = {"dates": [], "times": [], "datetimes": []}
     return data
 
 # --- Home Landing Page ---
@@ -25,6 +25,7 @@ def book():
     blackouts = load_blackout_data()
     return render_template('index.html', blackouts=blackouts)
 
+# --- Submit Client Appointment ---
 @app.route('/submit', methods=['POST'])
 def submit():
     name = request.form['name']
@@ -36,26 +37,26 @@ def submit():
     dt = f"{date} {time}"
 
     # --- Load blackout dates/times ---
-   # --- Load blackout dates/times ---
-try:
-    with open("blackout.json", "r") as f:
-        blackout_data = json.load(f)
-except FileNotFoundError:
-    blackout_data = {"dates": [], "times": [], "datetimes": []}
+    blackout_data = load_blackout_data()
 
-# Construct the datetime string
-dt = f"{date} {time}"
+    # Check if blocked
+    if (
+        date in blackout_data.get("dates", []) or
+        time in blackout_data.get("times", []) or
+        dt in blackout_data.get("datetimes", [])
+    ):
+        return "<h3 style='color: pink; background-color: black; text-align: center;'>This appointment slot is unavailable. Please <a href='/book'>try again</a>.</h3>"
 
-# Check blackout conditions
-if (
-    date in blackout_data.get("dates", []) or
-    time in blackout_data.get("times", []) or
-    dt in blackout_data.get("datetimes", [])
-):
-    return "<h3 style='color: pink; background-color: black; text-align: center;'>This appointment slot is unavailable. Please <a href='/book'>try again</a>.</h3>"
+    new_request = {
+        "name": name,
+        "phone": phone,
+        "email": email,
+        "service": service,
+        "date": date,
+        "time": time,
+        "datetime": dt
+    }
 
-
-    # --- Load and save client requests ---
     try:
         with open("client_requests.json", "r") as f:
             data = json.load(f)
@@ -68,7 +69,6 @@ if (
         json.dump(data, f, indent=4)
 
     return redirect(url_for('thank_you'))
-
 
 # --- Admin Login ---
 @app.route('/login', methods=['GET', 'POST'])
@@ -85,13 +85,15 @@ def login():
 def admin():
     if not session.get('admin'):
         return redirect(url_for('login'))
+
     try:
         with open("client_requests.json", "r") as f:
             requests = json.load(f)
     except FileNotFoundError:
         requests = []
-    blackout_data = load_blackout_data()
-    return render_template("admin.html", requests=requests, blackouts=blackout_data)
+
+    blackouts = load_blackout_data()
+    return render_template("admin.html", requests=requests, blackouts=blackouts)
 
 # --- Approve Booking and Add to Blackout ---
 @app.route('/approve/<int:index>', methods=['POST'])
@@ -99,28 +101,33 @@ def approve(index):
     try:
         with open("client_requests.json", "r") as f:
             data = json.load(f)
+
         approved = data[index]
         blackout = load_blackout_data()
-        blackout["dates"].append(approved["date"])
-        blackout["times"].append(approved["time"])
+
+        if approved["date"] not in blackout["dates"]:
+            blackout["dates"].append(approved["date"])
+        if approved["time"] not in blackout["times"]:
+            blackout["times"].append(approved["time"])
+        if approved["datetime"] not in blackout["datetimes"]:
+            blackout["datetimes"].append(approved["datetime"])
+
         with open("blackout.json", "w") as f:
             json.dump(blackout, f, indent=4)
+
         return redirect(url_for('admin'))
     except Exception as e:
-        return f"Error approving: {e}"
+        return f"<h3>Error approving: {e}</h3>"
 
 # --- Modify Availability Page ---
 @app.route('/availability', methods=['GET', 'POST'])
 def modify_availability():
-    try:
-        with open('blackout.json', 'r') as f:
-            blackout_data = json.load(f)
-    except FileNotFoundError:
-        blackout_data = {"dates": [], "times": []}
+    blackout_data = load_blackout_data()
 
     if request.method == 'POST':
         date = request.form.get('blackout_date')
         time = request.form.get('blackout_time')
+
         if date and date not in blackout_data["dates"]:
             blackout_data["dates"].append(date)
         if time and time not in blackout_data["times"]:
@@ -131,17 +138,13 @@ def modify_availability():
 
     return render_template('availability.html', blackouts=blackout_data)
 
-
+# --- Thank You Page ---
 @app.route('/thank-you')
 def thank_you():
-    return render_template("thank_you.html")  # or a simple thank you message
+    return render_template("thank_you.html")
 
-
-    return render_template("availability.html", blackouts=blackout)
-
+# --- Run ---
 if __name__ == '__main__':
     app.run(debug=True)
-
-
 
 
