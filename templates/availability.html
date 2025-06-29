@@ -1,40 +1,117 @@
-<!-- templates/availability.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Modify Availability</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: white; }
-        .btn-pink { background-color: #ff66cc; border: none; color: white; }
-        .btn-pink:hover { background-color: #ff3399; }
-        label { color: #ff66cc; }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #e91e63;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+        }
+
+        button {
+            background-color: #e91e63;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #2a2a2a;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        .back-link {
+            color: #e91e63;
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
-<body class="container py-5">
-    <h3 class="text-center mb-4">Modify Availability</h3>
+<body>
+    <h1>Modify Availability</h1>
+    <div class="container">
+        <form action="/add-blackout" method="post">
+            <label for="date">Add Blackout Date</label>
+            <input type="date" id="date" name="date" required>
 
-    <form method="post" action="/availability">
-        <div class="mb-3">
-            <label>Date (to disable)</label>
-            <input type="date" name="date" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label>Time (24-hr, e.g. 14:00)</label>
-            <input type="text" name="time" class="form-control" placeholder="Leave blank to disable entire date">
-        </div>
-        <button type="submit" class="btn btn-pink">Add Unavailable Slot</button>
-    </form>
+            <label for="time">Add Blackout Time</label>
+            <select id="time" name="time">
+                {% for hour in range(8, 23) %}
+                    <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour }}</option>
+                    <option value="{{ "%02d:30" % hour }}">{{ "%02d:30" % hour }}</option>
+                {% endfor %}
+                <option value="23:00">23:00</option>
+                <option value="23:30">23:30</option>
+            </select>
 
-    <hr>
-    <h5>Current Unavailable Slots</h5>
-    <ul>
-        {% for date, times in blackout.items() %}
-            <li><strong>{{ date }}</strong>: {{ times | join(', ') }}</li>
-        {% endfor %}
-    </ul>
+            <button type="submit">Add to Blackout List</button>
+        </form>
 
-    <a href="/admin" class="btn btn-secondary mt-4">Back to Dashboard</a>
+        <h2>Blackout Dates</h2>
+        <ul>
+            {% for date in blackouts.dates %}
+                <li>{{ date }}</li>
+            {% else %}
+                <li>No blackout dates yet.</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Blackout Times</h2>
+        <ul>
+            {% for time in blackouts.times %}
+                <li>{{ time }}</li>
+            {% else %}
+                <li>No blackout times yet.</li>
+            {% endfor %}
+        </ul>
+
+        <a class="back-link" href="{{ url_for('admin') }}">← Back to Dashboard</a>
+    </div>
 </body>
 </html>
+
