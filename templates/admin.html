@@ -1,19 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+        }
+        .card {
+            background-color: #1f1f1f;
+            border-color: #2c2c2c;
+        }
+        .card-title {
+            color: #ff66cc;
+        }
+    </style>
 </head>
 <body>
-    <h2>Pending Appointment Requests</h2>
-    <ul>
-        {% for req in requests %}
-        <li>
-            {{ req.datetime }} - {{ req.name }} - {{ req.service }}
-            <br>Phone: {{ req.phone }} | Email: {{ req.email }}
-        </li>
+    <div class="container mt-5">
+        <h1 class="text-center fw-bold mb-4">💼 Admin Dashboard</h1>
+        {% if requests %}
+            <div class="row">
+                {% for req in requests %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm p-3">
+                        <h5 class="card-title">{{ req.name }}</h5>
+                        <p class="card-text">
+                            <strong>Service:</strong> {{ req.service }}<br>
+                            <strong>Date/Time:</strong> {{ req.datetime }}<br>
+                            <strong>Phone:</strong> {{ req.phone }}<br>
+                            <strong>Email:</strong> {{ req.email }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         {% else %}
-        <p>No requests found.</p>
-        {% endfor %}
-    </ul>
+            <p class="text-center">No appointment requests found.</p>
+        {% endif %}
+    </div>
 </body>
 </html>
+
