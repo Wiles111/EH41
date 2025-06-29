@@ -62,16 +62,17 @@
     </form>
 
     <script>
-        const blackoutDates = {{ blackouts | tojson }};
-        const dateField = document.getElementById("dateField");
+    const blackoutDates = {{ blackouts | default({"dates": [], "times": []}) | tojson }};
+    const dateField = document.getElementById("dateField");
 
-        dateField.addEventListener("input", () => {
-            if (blackoutDates.includes(dateField.value)) {
-                alert("This date is unavailable. Please choose another.");
-                dateField.value = "";
-            }
-        });
-    </script>
+    dateField.addEventListener("input", () => {
+        if (blackoutDates.dates.includes(dateField.value)) {
+            alert("This date is unavailable. Please choose another.");
+            dateField.value = "";
+        }
+    });
+</script>
+
 </body>
 </html>
 
