@@ -72,6 +72,25 @@
 <p class="text-center mt-4" style="color: #ff66cc;">
     💻 Site Visits: {{ visits }}
 </p>
+<h4 class="mt-4">Black Out Dates</h4>
+<form action="/admin/blackout" method="post" class="d-flex gap-2">
+    <input type="date" name="blackout_date" class="form-control" required>
+    <button class="btn btn-warning" type="submit">Add</button>
+</form>
+
+<ul class="mt-3 text-light">
+    {% for d in blackouts %}
+        <li>
+            {{ d }}
+            <form action="/admin/remove_blackout/{{ d }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+            </form>
+        </li>
+    {% else %}
+        <li>No blackout dates.</li>
+    {% endfor %}
+</ul>
+
 
 </body>
 </html>
