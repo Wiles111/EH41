@@ -58,7 +58,7 @@
         <p><strong>Service:</strong> {{ r.service }}</p>
         <p><strong>Requested:</strong> {{ r.datetime }}</p>
 
-        <form action="{{ url_for('approve_request') }}" method="post" style="display:inline;">
+       <form action="{{ url_for('approve') }}" method="post" style="display:inline;">
             <input type="hidden" name="datetime" value="{{ r.datetime }}">
             <button type="submit">Approve</button>
         </form>
