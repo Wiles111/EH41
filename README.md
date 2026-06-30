@@ -1,0 +1,1 @@
+This is a basic code that I have start for my wifes business. It is suppose to help her automate appointments and provide transparency for clients for pricing, blackout dates etc, while also providing specifcs on appointments for my wife. 
